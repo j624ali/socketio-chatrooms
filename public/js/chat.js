@@ -4,6 +4,15 @@ const socket = io()
 // BOOTSTRAP
 var toastElList = document.querySelector('.toast')
 
+// Sound
+const joined = new Audio('../sounds/join.mp3')
+const left = new Audio('../sounds/left.mp3')
+const msgSound = new Audio('../sounds/msg.mp3')
+const errorSound = new Audio('../sounds/error.mp3')
+
+
+
+
 
 const $form = document.querySelector('#form')
 const $formTextInput = $form.querySelector('#message')
@@ -18,9 +27,19 @@ socket.on('message', (msg) => {
     const messageTemplate1 = document.importNode(messageTemplate, true)
     messageTemplate1.querySelector('.msg').textContent = msg
     console.log(msg)
-    $toastBody.textContent = msg
+    $toastBody.textContent = msg.message
     var toastList = new bootstrap.Toast(toastElList, { delay: 2500 })
     toastList.show()
+    if (msg.info == 'left') {
+        left.play()
+    }
+    if (msg.info == 'joined') {
+        joined.play()
+    }
+    
+    
+
+    
     
 })
 
@@ -28,7 +47,7 @@ socket.on('location', (location) => {
     const messageTemplate1 = document.importNode(messageTemplate, true)
     messageTemplate1.querySelector('.msg').innerHTML = `<small>${moment(location.createdAt).format('h:mm a')}</small> - ${location.message}`
     $messages.appendChild(messageTemplate1)
-
+    msgSound.play()
     console.log(location)
 })
 
@@ -42,6 +61,7 @@ socket.on('serverBroadcast', (serverMsg) => {
     $toastBody.textContent = serverMsg
     var toastList = new bootstrap.Toast(toastElList, { delay: 2500 })
     toastList.show()
+    msgSound.play()
     
 })
 
@@ -57,9 +77,10 @@ document.getElementById('form').addEventListener('submit', (e) => {
         $sendMessage.removeAttribute('disabled')
         $formTextInput.focus()
         if (error) {
-        $toastBody.textContent = error
+        $toastBody.textContent = error.message
         var toastList = new bootstrap.Toast(toastElList, { delay: 5000 })
         toastList.show()
+        errorSound.play()
         return console.log(error)
 
         }
@@ -84,7 +105,7 @@ document.querySelector('#send-location').addEventListener('click', (e) => {
         socket.emit('location', `https://maps.google.com/maps?q=${position.coords.latitude},${position.coords.longitude}`, (acknowledgement) => {
    
         console.log(acknowledgement)
-        $toastBody.textContent = acknowledgement
+        $toastBody.textContent = acknowledgement.message
         var toastList = new bootstrap.Toast(toastElList, { delay: 2500 })
         toastList.show()
             $sendLocationBtn.removeAttribute('disabled')

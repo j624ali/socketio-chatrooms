@@ -14,13 +14,13 @@ app.use(express.static(path.join(__dirname, '../public')))
 
 
 io.on('connection', (socket) => {
-    socket.emit('message', 'welcome to the chat app')
-    socket.broadcast.emit('message', 'A new user has joined')
+    socket.emit('message', { message: 'welcome to the chat app', info: 'welcome' })
+    socket.broadcast.emit('message', { message: 'A new user has joined', info: 'joined' })
 
     socket.on('clientMessage', (msg, callback) => {
         const filter = new Filter()
-        if (msg == '') return callback('Message can not be empty')
-        if (filter.isProfane(msg)) return callback('Profanity is not allowed.')
+        if (msg == '') return callback({ message: 'Message can not be empty', info: 'error' })
+        if (filter.isProfane(msg)) return callback({ message: 'Profanity is not allowed.', info: 'error' })
 
         io.emit('serverBroadcast', generateMessage(filter.clean(msg)))
         callback()
@@ -28,12 +28,12 @@ io.on('connection', (socket) => {
     })
 
     socket.on('disconnect', () => {
-        io.emit('message', 'A user has left the chat.')
+        io.emit('message', { message: 'A user has left the chat.', info: 'left' })
     })
 
     socket.on('location', (position, callback) => {
         io.emit('location', generateMessage(`<a href='${position}' target='_blank'>Here is my location.</a>`))
-        callback('Location shared.')
+        callback({ message: 'Location shared.', info: 'sent' })
 
     })
 
