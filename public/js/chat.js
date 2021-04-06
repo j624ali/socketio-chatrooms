@@ -10,7 +10,7 @@ const left = new Audio('../sounds/left.mp3')
 const msgSound = new Audio('../sounds/msg.mp3')
 const errorSound = new Audio('../sounds/error.mp3')
 
-
+const { username, room } = Qs.parse(location.search, { ignoreQueryPrefix: true })
 
 
 
@@ -19,7 +19,8 @@ const $formTextInput = $form.querySelector('#message')
 const $sendMessage = $form.querySelector('#send-message')
 const $sendLocationBtn = document.querySelector('#send-location')
 const $messages = document.getElementById('messages')
-const $toastBody = document.querySelector('.toast-body') 
+const $toastBody = document.querySelector('.toast-body')
+const $username = document.querySelector('#username')
 
 const messageTemplate = document.getElementById('message-template').content
 
@@ -44,8 +45,11 @@ socket.on('message', (msg) => {
 })
 
 socket.on('location', (location) => {
+    console.log(location)
+
     const messageTemplate1 = document.importNode(messageTemplate, true)
     messageTemplate1.querySelector('.msg').innerHTML = `<small>${moment(location.createdAt).format('h:mm a')}</small> - ${location.message}`
+    messageTemplate.querySelector('b').textContent = location.username
     $messages.appendChild(messageTemplate1)
     msgSound.play()
     console.log(location)
@@ -53,14 +57,12 @@ socket.on('location', (location) => {
 
 
 socket.on('serverBroadcast', (serverMsg) => {
+    console.log(serverMsg)
     const messageTemplate1 = document.importNode(messageTemplate, true)
+    messageTemplate.querySelector('b').textContent = serverMsg.username
     messageTemplate1.querySelector('.msg').innerHTML = `<small>${moment(serverMsg.createdAt).format('h:mm a')}</small> - ${serverMsg.message}`
     $messages.appendChild(messageTemplate1)
 
-    console.log(serverMsg)
-    $toastBody.textContent = serverMsg
-    var toastList = new bootstrap.Toast(toastElList, { delay: 2500 })
-    toastList.show()
     msgSound.play()
     
 })
@@ -114,6 +116,12 @@ document.querySelector('#send-location').addEventListener('click', (e) => {
     })
 })
 
+socket.emit('join', { username, room }, (error) => {
+    if (error) {
+        alert(error)
+        location.href = `/?error=${error}`
+    }
+})
 
 
 
