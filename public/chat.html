@@ -20,13 +20,14 @@
   </head>
   <body>
     <div class="container p-5">
-        <h2>Chat Room App</h2>
+        <h2 class="room-name"></h2>
 
 
 
             <div class="card">
                 <div class="card-header">
-                  Room
+                  <span><b>Users in room: </b></span>
+                  <span class="users-in-room"></span>
                 </div>
                 <div class="card-body">
                     <div id="messages">
@@ -66,13 +67,11 @@
 
     <template id='message-template'>
         <div class="alert-light">
-            <small><b class="username"></b></small>
+            <small><b class="username"></b> <span class="time"></span></small>
             <p class="msg"></p>
             <hr>
         </div>
     </template>
-
-
 
 
 

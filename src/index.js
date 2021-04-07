@@ -27,6 +27,10 @@ io.on('connection', (socket) => {
         socket.emit('message', { message: 'welcome to the chat app', info: 'welcome' })
         socket.broadcast.to(user.room).emit('message', { message: `${user.username} has joined`, info: 'joined' })
 
+        io.to(user.room).emit('updateUsersList', {
+            users: getUserInRoom(user.room)
+        })
+
         callback()
     })
     socket.on('clientMessage', (msg, callback) => {
@@ -45,7 +49,9 @@ io.on('connection', (socket) => {
         
         if (user) {
             io.to(user.room).emit('message', { message: `${user.username} has left the chat.`, info: 'left' })
-
+            io.to(user.room).emit('updateUsersList', {
+                users: getUserInRoom(user.room)
+            })
         }
     })
 

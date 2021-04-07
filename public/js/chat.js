@@ -20,7 +20,12 @@ const $sendMessage = $form.querySelector('#send-message')
 const $sendLocationBtn = document.querySelector('#send-location')
 const $messages = document.getElementById('messages')
 const $toastBody = document.querySelector('.toast-body')
-const $username = document.querySelector('#username')
+const $usersInRoom = document.querySelector('.users-in-room')
+const $messageBody = document.querySelector('.card-body')
+
+document.querySelector('.room-name').textContent = room
+
+
 
 const messageTemplate = document.getElementById('message-template').content
 
@@ -39,34 +44,45 @@ socket.on('message', (msg) => {
     }
     
     
-
-    
-    
+ 
 })
 
-socket.on('location', (location) => {
-    console.log(location)
+socket.on('location', ({ username, message, createdAt }) => {
+    console.log({ username, message, createdAt })
 
     const messageTemplate1 = document.importNode(messageTemplate, true)
-    messageTemplate1.querySelector('.msg').innerHTML = `<small>${moment(location.createdAt).format('h:mm a')}</small> - ${location.message}`
-    messageTemplate.querySelector('b').textContent = location.username
+    messageTemplate.querySelector('.time').textContent = ` - ${moment(createdAt).format('h:mm a')}`
+    messageTemplate.querySelector('.username').textContent = username
+    messageTemplate1.querySelector('.msg').innerHTML = message
     $messages.appendChild(messageTemplate1)
+    
+    $messageBody.scrollTop = $messageBody.scrollHeight
+    
     msgSound.play()
-    console.log(location)
+
 })
 
 
-socket.on('serverBroadcast', (serverMsg) => {
-    console.log(serverMsg)
+socket.on('serverBroadcast', ({ username, message, createdAt }) => {
+    console.log({ username, message, createdAt })
     const messageTemplate1 = document.importNode(messageTemplate, true)
-    messageTemplate.querySelector('b').textContent = serverMsg.username
-    messageTemplate1.querySelector('.msg').innerHTML = `<small>${moment(serverMsg.createdAt).format('h:mm a')}</small> - ${serverMsg.message}`
+    messageTemplate.querySelector('.time').textContent = ` - ${moment(createdAt).format('h:mm a')}`
+    messageTemplate.querySelector('.username').textContent = username
+    messageTemplate1.querySelector('.msg').innerHTML = message
     $messages.appendChild(messageTemplate1)
-
+    $messageBody.scrollTop = $messageBody.scrollHeight
+    
     msgSound.play()
     
 })
 
+
+
+socket.on('updateUsersList', (list) => {
+
+    $usersInRoom.textContent = list.users.length
+
+})
 
 const msgBox = document.getElementById('message')
 
